@@ -7,3 +7,25 @@ services:
 before_install:
   - chmod +x mvnw
 
+env:
+  global:
+    - secure: "Y6H2lG2OhRLah3peSfVFaYScMgLHaI3zJYQyTm3P/agK7FzVF6dl9KQESPmHCIsBhCHAItU2gSpOu2YkuHueB6OnOx8enQbTL7G1iMvYDSvJsMSxWikR8GoCHue730ZQuV/sW/cA35Bv2dy/ABARoJZ3XelLPkR/uwFn3w+ddGWbaV358h/VmyN5yOdHvn9eStKQQ8kXSBI8TTuqnOemiI6UYQbQF4ZMv6rirqkEtdeSZZCi+i1um3rC+nGeO5nMta6+f6bsGMbhuy4ywL3apImd7Z1+gDcUalkCsmBSiMKH+pIvjjwZ9LVmsdWkDYETUQzrVw94hM5ABokc7FowPnvnxpkBh0Fb9E4zoDGqXIJErW/TOJX5T6arTCNdvpP2Wt5qeDGh8UMM2E6RmHyyQ8m75JAIHznnW6hMn5CyI/cWHvVhTBHAOw+uHEKqJ4NyrNNrixL0+nmap7rEfAxLQO/SrBafARlbNfLhBKCa7H375XOr3jEMRMX6ODaSzHf6+g9aF8WibfWe+R7/pgcTy2D2R3bzeQhQPkU8E2yTXQRpemeEh8xbxl4C0WT/6pcpOilIur9dSSfSTeRc6EVNHinqGEF0D/MVZ+IoPOcEIFhq3SF7CWe29rKwJczL0Gl4Ov+PPyGUcVduLN1G9OBaYZFBYZqAgAb9byZc78sW30I="
+    - secure: "cw+cTnxX5GEYZJ615moVWZPEk9hfXQr47z78jxS4FnVkFy+MAkLSyC5GqKfyQwhejGBtVALf1wojD3g71BUI2Y1CXEYtywBXcynyTd6DF3PaQA9557PIyi62Nq+WIbwBhCRHNAaSCULRTS870Fx5xXomsoFsvtAuHipOVIYO0mAiI1KpgMlzeHirXWDFm4VG7xVomEPcpcKiTTyzvuwSHrETwA63/LEE3BGlq6gD2kd16hb5WegO2PbD2rDDUsaUILwZ+uMBLglQIXnolpbpGhozS8RI1kxQarmWtmlcGz4PBpJDuUlP44xd+CVGQ9vW70wSAH16kqgeJi2W35JRgbhUPx251dDGlSO2SCXLDQPVOzxph6DXErTYDRbsvVBp6GEV9vWTR8kT1Ou11qJo1sdhKc6/mjmOMKU40iqjUrr/RSgn5R8RIm6r5v6DxZsE/uYDpBbJnCPc477giOndmqfSLRrCGD0G5FrK7XIesH+KrB8Fw++CB3jzixMX8d+J809d9T0seZQ2EHcSQu8Id0smKsi8ZXcr1d0O+zyNQ9hBJSdaSCX9K3iizrornS+YRlDWXWZX7XYTjb4JzuLbEuZYJCjyL0PWXrRvKs/RfcOIOYmjK/xYhv7vqJa0ppE8TmfOs6dThViDKo7ncFcZcUJcGywfN0S9Xr3GDpPA388="
+    - secure: "pqTXkOn4LJhbv30DxpfjH46aDPcocUIuKOYGgNRvVDJween0QXqyYze6dNKAI8w2Qs0Vor4Y2PDO+qgcNbGiRp+ad94cVOb30Pv7iZkfYgyC7O3FdxCJUM6ULTerVov9Y7x1WJNRCrzjGWECsRfOHNZNKzHjJn1vhbLfAg2iLAzPVNMJbEpqTpwXAWbFZncWMwHjzKySAM9LebK2Eo+wWYc6forfKPkPEVFxxPkyNhKM7Q/mNnPJTWM/K+SIVDuTM+aSLSbXxwqD/xEdYvYa2M9oMStnzuXzorIDBh7MAbkHBZ/NPR85vZg98Y+Fnsrh/9gqlIsbteH0hysh6rVmwabI8qHgyakfSEYR81c5hBRzQUq+lbw3Yu4LTi9gy24sBzbYEzvYty2xyCHjzNQf+tXVZzhVv245tbl14YQdYEPp6lXAoitsBC9Alba5muI984kF7CWVPdkamD03LGhKlbeSTLoKocmN7Hrd+uYIyD84z7STXemkZReiCDVnTFk1+qLbKPKUQ4Xw6moVxUfcyTe9NzsYasSzfqFUEcfZd13q0r+4ERpp58jZmm176sU0D6gd3MxN1o4T+BPPzfxDTFj41nppwHGudTMcUCqqmHoPMGZJAEkAZAPLxRvU0GGb7p+aKbzvH/2vxnQgQbMEex9iT3HPEX9cG06ycVTXWMI="
+    - COMMIT=${TRAVIS_COMMIT::7}
+
+script:
+  - ./mvnw clean install -B
+
+after_success:
+  - docker login -u $DOCKER_USER -p $DOCKER_PASS
+  - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo "$TRAVIS_BRANCH"; fi`
+  - export IMAGE_NAME=socialnetworkapi/master-repo
+  - docker build -t $IMAGE_NAME:latest .
+  - docker tag $IMAGE_NAME:latest $IMAGE_NAME:$TAG
+  - docker push $IMAGE_NAME:$TAG
+
+deploy:
+  provider: heroku
+  api_key: $HEROKU_API_KEY
+  app: socialnetwork99
