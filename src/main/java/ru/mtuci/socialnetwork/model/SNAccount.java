@@ -16,14 +16,18 @@ import javax.validation.constraints.NotNull;
 @EqualsAndHashCode(callSuper = true)
 public class SNAccount extends AbstractBaseEntity {
 
-    @NotBlank
-//    @SafeHtml
+    @NotNull
+    private String surname;
+    @NotNull
     private String name;
-    @NotBlank
-//    @SafeHtml
-    private String publisher;
     @NotNull
-    private String release;
+    private String nickname;
     @NotNull
-    private String mode;
+    private String birthday;
+    @NotNull
+    private int age;
+    @NotNull
+    private String email;
+    @NotNull
+    private String pet;
 }
